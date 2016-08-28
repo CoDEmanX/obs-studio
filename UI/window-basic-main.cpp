@@ -1019,6 +1019,8 @@ void OBSBasic::ResetOutputs()
 #define SHUTDOWN_SEPARATOR \
 	"==== Shutting down =================================================="
 
+extern obs_studio_callbacks *InitializeAPIInterface(OBSBasic *main);
+
 void OBSBasic::OBSInit()
 {
 	ProfileScope("OBSBasic::OBSInit");
@@ -1181,6 +1183,8 @@ void OBSBasic::OBSInit()
 	}
 
 	ui->mainSplitter->setSizes(defSizes);
+
+	api = InitializeAPIInterface(this);
 
 	SystemTray(true);
 }
@@ -2067,6 +2071,8 @@ void OBSBasic::DuplicateSelectedScene()
 		AddScene(source);
 		SetCurrentScene(source, true);
 		obs_scene_release(scene);
+
+		api->on_event(OBS_STUDIO_EVENT_SCENE_LIST_CHANGED);
 		break;
 	}
 }
@@ -2076,8 +2082,11 @@ void OBSBasic::RemoveSelectedScene()
 	OBSScene scene = GetCurrentScene();
 	if (scene) {
 		obs_source_t *source = obs_scene_get_source(scene);
-		if (QueryRemoveSource(source))
+		if (QueryRemoveSource(source)) {
 			obs_source_remove(source);
+
+			api->on_event(OBS_STUDIO_EVENT_SCENE_LIST_CHANGED);
+		}
 	}
 }
 
@@ -2644,6 +2653,8 @@ void OBSBasic::closeEvent(QCloseEvent *event)
 	/* Clear all scene data (dialogs, widgets, widget sub-items, scenes,
 	 * sources, etc) so that all references are released before shutdown */
 	ClearSceneData();
+
+	api->on_event(OBS_STUDIO_EVENT_EXIT);
 }
 
 void OBSBasic::changeEvent(QEvent *event)
@@ -3487,6 +3498,8 @@ void OBSBasic::SceneNameEdited(QWidget *editor,
 	obs_source_t *source = obs_scene_get_source(scene);
 	RenameListItem(this, ui->scenes, source, text);
 
+	api->on_event(OBS_STUDIO_EVENT_SCENE_LIST_CHANGED);
+
 	UNUSED_PARAMETER(endHint);
 }
 
@@ -3537,6 +3550,9 @@ void OBSBasic::OpenSceneFilters()
 
 void OBSBasic::StartStreaming()
 {
+	if (outputHandler->StreamingActive())
+		return;
+
 	SaveProject();
 
 	ui->streamButton->setEnabled(false);
@@ -3684,6 +3700,8 @@ void OBSBasic::StreamingStart()
 	sysTrayStream->setText(ui->streamButton->text());
 	sysTrayStream->setEnabled(true);
 
+	api->on_event(OBS_STUDIO_EVENT_STREAM_STARTED);
+
 	OnActivate();
 
 	blog(LOG_INFO, STREAMING_START);
@@ -3693,6 +3711,8 @@ void OBSBasic::StreamStopping()
 {
 	ui->streamButton->setText(QTStr("Basic.Main.StoppingStreaming"));
 	sysTrayStream->setText(ui->streamButton->text());
+
+	api->on_event(OBS_STUDIO_EVENT_STREAM_STOPPING);
 }
 
 void OBSBasic::StreamingStop(int code)
@@ -3730,6 +3750,8 @@ void OBSBasic::StreamingStop(int code)
 	sysTrayStream->setText(ui->streamButton->text());
 	sysTrayStream->setEnabled(true);
 
+	api->on_event(OBS_STUDIO_EVENT_STREAM_STOPPED);
+
 	OnDeactivate();
 
 	blog(LOG_INFO, STREAMING_STOP);
@@ -3762,6 +3784,8 @@ void OBSBasic::RecordStopping()
 {
 	ui->recordButton->setText(QTStr("Basic.Main.StoppingRecording"));
 	sysTrayRecord->setText(ui->recordButton->text());
+
+	api->on_event(OBS_STUDIO_EVENT_RECORDING_STOPPING);
 }
 
 void OBSBasic::StopRecording()
@@ -3779,6 +3803,8 @@ void OBSBasic::RecordingStart()
 	ui->statusbar->RecordingStarted(outputHandler->fileOutput);
 	ui->recordButton->setText(QTStr("Basic.Main.StopRecording"));
 	sysTrayRecord->setText(ui->recordButton->text());
+
+	api->on_event(OBS_STUDIO_EVENT_RECORDING_STARTED);
 
 	OnActivate();
 
@@ -3819,6 +3845,8 @@ void OBSBasic::RecordingStop(int code)
 		SysTrayNotify(QTStr("Output.RecordError.Msg"),
 			QSystemTrayIcon::Warning);
 	}
+
+	api->on_event(OBS_STUDIO_EVENT_RECORDING_STOPPED);
 
 	OnDeactivate();
 }

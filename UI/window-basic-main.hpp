@@ -30,6 +30,8 @@
 #include "window-basic-adv-audio.hpp"
 #include "window-basic-filters.hpp"
 
+#include "obs-studio-frontend-api/obs-studio-frontend-internal.hpp"
+
 #include <util/platform.h>
 #include <util/threading.h>
 #include <util/util.hpp>
@@ -83,6 +85,7 @@ class OBSBasic : public OBSMainWindow {
 	friend class OBSBasicPreview;
 	friend class OBSBasicStatusBar;
 	friend class OBSBasicSourceSelect;
+	friend struct OBSStudioAPI;
 
 	enum class MoveDir {
 		Up,
@@ -92,6 +95,8 @@ class OBSBasic : public OBSMainWindow {
 	};
 
 private:
+	obs_studio_callbacks *api = nullptr;
+
 	std::vector<VolControl*> volumes;
 
 	std::vector<OBSSignal> signalHandlers;
@@ -232,10 +237,7 @@ private:
 
 	void InitDefaultTransitions();
 	void InitTransition(obs_source_t *transition);
-	void TransitionToScene(obs_scene_t *scene, bool force = false);
-	void TransitionToScene(obs_source_t *scene, bool force = false);
 	obs_source_t *FindTransition(const char *name);
-	void SetTransition(obs_source_t *transition);
 	OBSSource GetCurrentTransition();
 	obs_data_array_t *SaveTransitions();
 	void LoadTransitions(obs_data_array_t *transitions);
@@ -315,6 +317,10 @@ public slots:
 
 	void SaveProjectDeferred();
 	void SaveProject();
+
+	void SetTransition(OBSSource transition);
+	void TransitionToScene(OBSScene scene, bool force = false);
+	void TransitionToScene(OBSSource scene, bool force = false);
 
 private slots:
 	void AddSceneItem(OBSSceneItem item);

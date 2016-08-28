@@ -24,7 +24,7 @@
 #include "window-namedialog.hpp"
 #include "qt-wrappers.hpp"
 
-template <typename Func> static void EnumProfiles(Func &&cb)
+void EnumProfiles(std::function<bool (const char *, const char *)> &&cb)
 {
 	char path[512];
 	os_glob_t *glob;
@@ -239,6 +239,9 @@ bool OBSBasic::AddProfile(bool create_new, const char *title, const char *text,
 
 	config_save_safe(App()->GlobalConfig(), "tmp", nullptr);
 	UpdateTitleBar();
+
+	api->on_event(OBS_STUDIO_EVENT_PROFILE_LIST_CHANGED);
+	api->on_event(OBS_STUDIO_EVENT_PROFILE_CHANGED);
 	return true;
 }
 
@@ -363,6 +366,9 @@ void OBSBasic::on_actionRenameProfile_triggered()
 		DeleteProfile(curName.c_str(), curDir.c_str());
 		RefreshProfiles();
 	}
+
+	api->on_event(OBS_STUDIO_EVENT_PROFILE_LIST_CHANGED);
+	api->on_event(OBS_STUDIO_EVENT_PROFILE_CHANGED);
 }
 
 void OBSBasic::on_actionRemoveProfile_triggered()
@@ -431,6 +437,9 @@ void OBSBasic::on_actionRemoveProfile_triggered()
 	blog(LOG_INFO, "------------------------------------------------");
 
 	UpdateTitleBar();
+
+	api->on_event(OBS_STUDIO_EVENT_PROFILE_LIST_CHANGED);
+	api->on_event(OBS_STUDIO_EVENT_PROFILE_CHANGED);
 }
 
 void OBSBasic::ChangeProfile()
@@ -481,4 +490,6 @@ void OBSBasic::ChangeProfile()
 	blog(LOG_INFO, "Switched to profile '%s' (%s)",
 			newName, newDir);
 	blog(LOG_INFO, "------------------------------------------------");
+
+	api->on_event(OBS_STUDIO_EVENT_PROFILE_CHANGED);
 }

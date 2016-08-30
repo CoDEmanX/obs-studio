@@ -234,7 +234,8 @@ void OBSBasic::TransitionStopped()
 			SetCurrentScene(scene);
 	}
 
-	api->on_event(OBS_STUDIO_EVENT_TRANSITION_STOPPED);
+	if (api)
+		api->on_event(OBS_STUDIO_EVENT_TRANSITION_STOPPED);
 
 	swapScene = nullptr;
 }
@@ -320,7 +321,8 @@ void OBSBasic::SetTransition(OBSSource transition)
 	ui->transitionRemove->setEnabled(configurable);
 	ui->transitionProps->setEnabled(configurable);
 
-	api->on_event(OBS_STUDIO_EVENT_TRANSITION_CHANGED);
+	if (api)
+		api->on_event(OBS_STUDIO_EVENT_TRANSITION_CHANGED);
 }
 
 OBSSource OBSBasic::GetCurrentTransition()
@@ -383,7 +385,8 @@ void OBSBasic::AddTransition()
 		CreatePropertiesWindow(source);
 		obs_source_release(source);
 
-		api->on_event(OBS_STUDIO_EVENT_TRANSITION_LIST_CHANGED);
+		if (api)
+			api->on_event(OBS_STUDIO_EVENT_TRANSITION_LIST_CHANGED);
 	}
 }
 
@@ -435,7 +438,8 @@ void OBSBasic::on_transitionRemove_clicked()
 
 	ui->transitions->removeItem(idx);
 
-	api->on_event(OBS_STUDIO_EVENT_TRANSITION_LIST_CHANGED);
+	if (api)
+		api->on_event(OBS_STUDIO_EVENT_TRANSITION_LIST_CHANGED);
 }
 
 void OBSBasic::RenameTransition()
@@ -571,7 +575,8 @@ void OBSBasic::SetCurrentScene(obs_source_t *scene, bool force)
 
 	UpdateSceneSelection(scene);
 
-	api->on_event(OBS_STUDIO_EVENT_SCENE_CHANGED);
+	if (api)
+		api->on_event(OBS_STUDIO_EVENT_SCENE_CHANGED);
 
 	bool userSwitched = (!force && !disableSaving);
 	blog(LOG_INFO, "%s to scene '%s'",

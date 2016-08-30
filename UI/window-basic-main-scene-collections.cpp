@@ -179,8 +179,10 @@ void OBSBasic::AddSceneCollection(bool create_new)
 
 	UpdateTitleBar();
 
-	api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_LIST_CHANGED);
-	api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_CHANGED);
+	if (api) {
+		api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_LIST_CHANGED);
+		api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_CHANGED);
+	}
 }
 
 void OBSBasic::RefreshSceneCollections()
@@ -271,8 +273,10 @@ void OBSBasic::on_actionRenameSceneCollection_triggered()
 	UpdateTitleBar();
 	RefreshSceneCollections();
 
-	api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_LIST_CHANGED);
-	api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_CHANGED);
+	if (api) {
+		api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_LIST_CHANGED);
+		api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_CHANGED);
+	}
 }
 
 void OBSBasic::on_actionRemoveSceneCollection_triggered()
@@ -337,8 +341,10 @@ void OBSBasic::on_actionRemoveSceneCollection_triggered()
 
 	UpdateTitleBar();
 
-	api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_LIST_CHANGED);
-	api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_CHANGED);
+	if (api) {
+		api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_LIST_CHANGED);
+		api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_CHANGED);
+	}
 }
 
 void OBSBasic::ChangeSceneCollection()
@@ -376,5 +382,6 @@ void OBSBasic::ChangeSceneCollection()
 
 	UpdateTitleBar();
 
-	api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_CHANGED);
+	if (api)
+		api->on_event(OBS_STUDIO_EVENT_SCENE_COLLECTION_CHANGED);
 }
